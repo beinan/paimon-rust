@@ -249,6 +249,15 @@ while let Some(batch) = stream.next().await {
 }
 ```
 
+For wide primary-key rows, `read.merge-batch-size` controls the maximum rows
+emitted per sort-merge output batch (default `1024`). It is independent of
+`read.batch-size`, which controls file-format input decoding. Set it through
+`Table::copy_with_options`; smaller outputs release accumulated input buffers
+more frequently without changing key ordering, deduplication, or merge rules.
+This is a row limit, not a byte or total-memory limit: individual rows, merge
+groups, and input streams can still require large buffers. Append-only and
+raw-convertible reads do not use this option.
+
 ## Building from Source
 
 ```bash
