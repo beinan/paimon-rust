@@ -33,9 +33,9 @@ use super::sort_merge::{
 use crate::arrow::build_target_arrow_schema;
 use crate::io::FileIO;
 use crate::spec::{
-    BigIntType, DataField, DataType as PaimonDataType, MergeEngine, PartialUpdateConfig, Predicate,
-    TinyIntType, SEQUENCE_NUMBER_FIELD_ID, SEQUENCE_NUMBER_FIELD_NAME, VALUE_KIND_FIELD_ID,
-    VALUE_KIND_FIELD_NAME,
+    BigIntType, CoreOptions, DataField, DataType as PaimonDataType, MergeEngine,
+    PartialUpdateConfig, Predicate, TinyIntType, SEQUENCE_NUMBER_FIELD_ID,
+    SEQUENCE_NUMBER_FIELD_NAME, VALUE_KIND_FIELD_ID, VALUE_KIND_FIELD_NAME,
 };
 use crate::table::schema_manager::SchemaManager;
 use crate::table::ArrowRecordBatchStream;
@@ -376,6 +376,7 @@ impl KeyValueFileReader {
         let table_fields = self.config.table_fields;
         let table_name = self.config.table_name;
         let table_options = self.config.table_options;
+        let merge_batch_size = CoreOptions::new(&table_options).read_merge_batch_size()?;
         let pushdown_predicates = self.pushdown_predicates;
         let residual_predicates = self.config.predicates;
         let primary_keys = self.config.primary_keys;
@@ -471,6 +472,7 @@ impl KeyValueFileReader {
                         &sequence_fields,
                     )?,
                 )
+                .with_batch_size(merge_batch_size)
                 .build()?;
 
                 while let Some(batch) = merge_stream.next().await {

@@ -938,7 +938,6 @@ impl SortMergeReaderBuilder {
         }
     }
 
-    #[cfg(test)]
     pub(crate) fn with_batch_size(mut self, batch_size: usize) -> Self {
         self.batch_size = batch_size;
         self
